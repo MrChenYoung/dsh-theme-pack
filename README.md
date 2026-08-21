@@ -1,6 +1,8 @@
 # dsh-theme-pack
 
-DeepSeek Harness（DSH）Web UI 的多主题包插件。内置 6 套流行配色（Tokyo Night、Catppuccin、Claude、GitHub、Dracula、Nord），每套含亮色 + 暗色两个变体，可在 **Settings → Plugins → Theme Pack** 卡片中即时切换。
+DeepSeek Harness（DSH）Web UI 的多主题包插件。内置 8 套流行配色（Tokyo Night、Catppuccin、Claude、GitHub、Dracula、Nord、Rosé Pine、Kanagawa），每套含亮色 + 暗色两个变体，可在 **Settings → Plugins → Theme Pack** 卡片中即时切换。
+
+护眼向推荐：**Rosé Pine**（低饱和玫瑰粉 + 金 + 青，多色调柔和）、**Kanagawa**（Dragon 变体专为深夜低对比设计，Lotus 亮色为暖奶油底）。
 
 ## 分类归属
 
@@ -13,7 +15,7 @@ DeepSeek Harness（DSH）Web UI 的多主题包插件。内置 6 套流行配色
 | 文件 | 角色 | 加载时机 |
 |---|---|---|
 | `lib/index.js` | 宿主半：注册 `ui-theme-pack` settings section（zod schema，theme 枚举 + 默认 tokyo-night） | web server 启动时 |
-| `lib/client.browser.js` | 浏览器半：6 套配色 × 亮/暗，生成 `--dsw-alias-*` token 覆盖 CSS，注入 `<style>` 标签；注册设置卡片（色板网格 + 下拉框） | 浏览器每次请求现读 |
+| `lib/client.browser.js` | 浏览器半：8 套配色 × 亮/暗，生成 `--dsw-alias-*` token 覆盖 CSS，注入 `<style>` 标签；注册设置卡片（色板网格 + 下拉框） | 浏览器每次请求现读 |
 | `cordis.patch.yml` | bundle 层：向 settings 插入 `ui-theme-pack` 行（默认 `theme: tokyo-night`） | profile 组合时 |
 
 **工作原理**：内置主题引擎 `@deepseek-ai/dsh-client-ui-theme` 的 ThemePresenter 把 token 写成 `body` 的 inline style；本插件用带 `!important` 的 stylesheet 规则压过 inline style，从而换肤。内置的 light/dark/system 偏好（`ui-theme`）不受影响——本插件只改变每种模式下用哪套配色。
@@ -48,7 +50,7 @@ profile 的 `package.json` 中已登记：
 ## 测试
 
 ```bash
-node test-css.mjs      # 提取 CSS 生成逻辑，验证 6 套主题 × 71 变量全部合法
+node test-css.mjs      # 提取 CSS 生成逻辑，验证 8 套主题 × 71 变量全部合法
 node test-browser.mjs  # 假 DOM 冒烟测试：factory + apply() 跑通、style 注入成功
 ```
 
