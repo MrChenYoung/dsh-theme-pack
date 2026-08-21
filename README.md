@@ -22,16 +22,38 @@ DeepSeek Harness（DSH）Web UI 的多主题包插件。内置 8 套流行配色
 
 **token 覆盖**：每套配色 71 个 `--dsw-alias-*` / `--dsw-specific-*` 变量（亮、暗各一份），含设计系统笔误 token `--dsw-alias-brand-primary-new-colorprimary-new-color`（`dsh-client-ui-trajectory` 在用）和 `--dsw-alias-border-l2-darkmode-thin`（4 个 UI 包在用）。
 
-## 安装方式
+## 安装
 
-源码在本目录（唯一事实来源），通过符号链接安装到 DSH profile：
+### 用户安装（推荐）
+
+仓库已公开，直接从 GitHub 装，无需软链接。在 profile 的 `package.json` 里登记依赖：
+
+```json
+"dependencies": {
+  "dsh-theme-pack": "github:MrChenYoung/dsh-theme-pack"
+}
+```
+
+`dsh.profile.bundles` 数组中加入 `"dsh-theme-pack"`，然后安装：
+
+```bash
+cd ~/.dsh/profiles/web && pnpm install
+```
+
+pnpm 会从 GitHub 克隆并自动装好依赖（`@deepseek-ai/dsh-settings`、`@deepseek-ai/schemastery`）。装完重启 web server（宿主半在启动时加载）即可在 **Settings → Plugins → Theme Pack** 切换主题。
+
+> 若日后发布到 npm，可改用 `"dsh-theme-pack": "dsh-theme-pack@latest"`。
+
+### 开发安装（软链接，仅维护者）
+
+源码在本目录（唯一事实来源），开发期通过符号链接安装到 DSH profile，改源码刷新即生效：
 
 ```
 ~/.dsh/profiles/web/node_modules/dsh-theme-pack
   -> $HOME/Desktop/Projects/agents/dsh-theme-pack
 ```
 
-profile 的 `package.json` 中已登记：
+profile 的 `package.json` 中登记（开发期用 `file:` 指向本地源码）：
 
 ```json
 "dependencies": {
