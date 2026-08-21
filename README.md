@@ -41,6 +41,17 @@ profile 的 `package.json` 中已登记：
 
 `dsh.profile.bundles` 数组中包含 `"dsh-theme-pack"`。
 
+**本目录有自己的 `node_modules/` 和 `pnpm-lock.yaml`**（`pnpm install` 生成，已 gitignore）。这是必须的：Node 加载模块时把软链接解析成真实路径，`lib/index.js` 的 `import '@deepseek-ai/dsh-settings'` 会从本目录往上找依赖，而不是从 profile 的 node_modules 找。所以 `package.json` 里声明了这两个依赖并在本地安装。
+
+**注意**：在 profile 目录跑 `pnpm install --force`（或全新安装）会把软链接替换成硬链接目录，之后改源码不会自动同步（pnpm 普通 install 报 "Already up to date" 不刷新内容）。遇到这种情况重建软链接：
+
+```bash
+cd ~/.dsh/profiles/web/node_modules
+rm -rf dsh-theme-pack && ln -s $HOME/Desktop/Projects/agents/dsh-theme-pack dsh-theme-pack
+```
+
+普通 `pnpm install` 不会动软链接（已验证）。
+
 ## 开发工作流
 
 - **改浏览器半**（`lib/client.browser.js`）：保存后**刷新页面即生效**（client bundle 每次请求现读，`cache-control: no-cache`）
