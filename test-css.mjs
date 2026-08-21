@@ -27,8 +27,11 @@ for (const id of THEME_IDS) {
   const darkBlock = css.match(/body\[data-ds-dark-theme\]\{([^}]*)\}/);
   const lightVars = lightBlock ? lightBlock[1].split(";").filter(Boolean) : [];
   const darkVars = darkBlock ? darkBlock[1].split(";").filter(Boolean) : [];
-  // Every declaration must be `--dsw-...:value!important`.
-  const bad = [...lightVars, ...darkVars].filter((d) => !/^--dsw-[a-z0-9-]+:.+!important$/.test(d));
+  // Every declaration must be `--dsw-...:value!important` or
+  // `--shiki-token-...:value!important`.
+  const bad = [...lightVars, ...darkVars].filter(
+    (d) => !/^(--dsw-[a-z0-9-]+|--shiki-token-[a-z-]+):.+!important$/.test(d)
+  );
   if (bad.length) {
     problems++;
     console.log(`[FAIL] ${id}: ${bad.length} malformed declarations`);
