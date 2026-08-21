@@ -1,0 +1,17 @@
+# dsh-theme-pack bundle layer: applied after dsh-base and dsh-web-app,
+# before the profile's own cordis.patch.yml (last write wins per row).
+#
+# Installing this package adds a "Theme Pack" card to Settings -> Plugins.
+# The card selects one of the bundled palettes; the browser half rebinds the
+# --dsw-alias-* design tokens to that palette (light + dark variants each).
+# The built-in light/dark/system preference (ui-theme) is untouched — this
+# pack only changes WHICH palette each mode uses.
+#
+# Removing this package (dsh plugin --profile web remove dsh-theme-pack)
+# drops this whole layer and the UI falls back to the default palette.
+
+- insert:
+    - id: ui-theme-pack
+      name: 'dsh-theme-pack'
+      config:
+        theme: tokyo-night

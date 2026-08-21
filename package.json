@@ -1,0 +1,46 @@
+{
+  "name": "dsh-theme-pack",
+  "version": "0.1.0",
+  "description": "Multi-theme pack for the DeepSeek Harness web UI. Bundles six popular palettes (Tokyo Night, Catppuccin, Claude, GitHub, Dracula, Nord) with light + dark variants each, switchable from Settings -> Plugins.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.browser.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "theme",
+    "themes",
+    "appearance",
+    "tokyo-night",
+    "catppuccin",
+    "dracula",
+    "nord"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-connection",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-settings"
+      ],
+      "platform": "web"
+    }
+  }
+}

@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>dsh-theme-pack 预览</title>
+<style>
+  /* ---- mock dsh UI layout, styled by the --dsw-alias-* tokens ---- */
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: var(--dsw-alias-font, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif);
+    background: var(--dsw-alias-bg-base);
+    color: var(--dsw-alias-label-primary);
+    display: flex; flex-direction: column;
+  }
+  /* control bar (not themed — always readable) */
+  .ctrl {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 10px 16px; background: #111318; color: #e6e8ee;
+    border-bottom: 1px solid #2a2d36; font-size: 13px;
+  }
+  .ctrl .grp { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .ctrl .lbl { opacity: .6; margin-right: 2px; }
+  .tbtn {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid #33363f; background: #1b1e26; color: #e6e8ee;
+    border-radius: 8px; padding: 5px 10px; font-size: 12px; cursor: pointer;
+  }
+  .tbtn:hover { border-color: #555a68; }
+  .tbtn.on { border-color: #7aa2f7; box-shadow: 0 0 0 1px #7aa2f7 inset; }
+  .tbtn .dot { width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 0 1px rgb(255 255 255 / 25%); }
+  .modebtn { border: 1px solid #33363f; background: #1b1e26; color: #e6e8ee; border-radius: 8px; padding: 5px 12px; font-size: 12px; cursor: pointer; }
+  .modebtn.on { border-color: #7aa2f7; }
+  .ctrl .spacer { flex: 1; }
+  .ctrl .note { opacity: .5; font-size: 11px; }
+
+  /* ---- the themed mock app ---- */
+  .app { flex: 1; display: flex; min-height: 0; }
+  .sidebar {
+    width: 240px; flex: none; background: var(--dsw-specific-sidebar-fill);
+    border-right: 1px solid var(--dsw-alias-border-l2);
+    display: flex; flex-direction: column; padding: 12px 8px; gap: 4px;
+  }
+  .side-title { font-size: 12px; color: var(--dsw-alias-label-tertiary); padding: 4px 10px; }
+  .side-item {
+    display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px;
+    font-size: 13px; color: var(--dsw-alias-label-secondary); cursor: pointer;
+  }
+  .side-item:hover { background: var(--dsw-specific-sidebar-nav-item-hover); }
+  .side-item.active { background: var(--dsw-specific-sidebar-nav-item-active); color: var(--dsw-alias-label-primary); }
+  .side-item .ico { width: 16px; height: 16px; border-radius: 4px; background: var(--dsw-alias-brand-primary); opacity: .8; flex: none; }
+
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .topbar {
+    height: 48px; flex: none; display: flex; align-items: center; gap: 10px;
+    padding: 0 18px; border-bottom: 1px solid var(--dsw-alias-border-l2);
+    background: var(--dsw-alias-bg-layer-1);
+  }
+  .topbar .title { font-size: 14px; font-weight: 600; }
+  .topbar .badge { font-size: 11px; color: var(--dsw-alias-label-tertiary); border: 1px solid var(--dsw-alias-border-l2); border-radius: 999px; padding: 1px 8px; }
+  .topbar .spacer { flex: 1; }
+  .avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--dsw-alias-brand-primary); }
+
+  .chat { flex: 1; overflow: auto; padding: 22px 26px; display: flex; flex-direction: column; gap: 18px; }
+  .msg { display: flex; gap: 12px; max-width: 760px; }
+  .msg .mavatar { width: 30px; height: 30px; border-radius: 8px; flex: none; background: var(--dsw-alias-brand-primary); }
+  .msg.user .mavatar { background: var(--dsw-alias-bg-layer-3); }
+  .msg .body { display: flex; flex-direction: column; gap: 6px; padding-top: 3px; }
+  .msg .who { font-size: 12px; color: var(--dsw-alias-label-tertiary); }
+  .bubble {
+    background: var(--dsw-specific-bubble); border: 1px solid var(--dsw-alias-border-l1);
+    border-radius: 12px; padding: 10px 14px; font-size: 14px; line-height: 1.6;
+    color: var(--dsw-alias-label-primary);
+  }
+  .msg.user .bubble { background: var(--dsw-specific-bubble-highlight); }
+  .bubble code {
+    font-family: var(--ds-font-family-code, "SF Mono", Menlo, monospace);
+    background: var(--dsw-alias-markdown-inline-code); border-radius: 4px; padding: 1px 5px; font-size: 12.5px;
+  }
+  .codeblock {
+    background: var(--dsw-alias-markdown-code-block); border: 1px solid var(--dsw-alias-border-l2);
+    border-radius: 10px; padding: 12px 14px; font-family: var(--ds-font-family-code, "SF Mono", Menlo, monospace);
+    font-size: 12.5px; line-height: 1.6; color: var(--dsw-alias-label-secondary); overflow: auto;
+  }
+  .codeblock .banner { font-size: 11px; color: var(--dsw-alias-label-tertiary); margin-bottom: 8px; }
+
+  .composer {
+    flex: none; padding: 14px 26px 20px; border-top: 1px solid var(--dsw-alias-border-l2);
+    background: var(--dsw-alias-bg-layer-1);
+  }
+  .composer .box {
+    border: 1px solid var(--dsw-alias-border-l2); border-radius: 14px;
+    background: var(--dsw-specific-input-major); padding: 12px 14px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .composer .ph { font-size: 14px; color: var(--dsw-alias-label-tertiary); }
+  .composer .row { display: flex; align-items: center; gap: 8px; }
+  .composer .chip { font-size: 12px; color: var(--dsw-alias-label-secondary); border: 1px solid var(--dsw-alias-border-l2); border-radius: 999px; padding: 2px 10px; }
+  .composer .spacer { flex: 1; }
+  .send {
+    background: var(--dsw-alias-button-primary-fill); color: var(--dsw-alias-label-primary-foreground);
+    border: none; border-radius: 9px; padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+  <div class="ctrl">
+    <span class="lbl">配色</span>
+    <div class="grp" id="themes"></div>
+    <span class="lbl" style="margin-left:10px">模式</span>
+    <div class="grp">
+      <button class="modebtn" id="modeLight">☀ 浅色</button>
+      <button class="modebtn" id="modeDark">🌙 深色</button>
+    </div>
+    <div class="spacer"></div>
+    <span class="note">dsh-theme-pack 预览 · 点击配色即时切换</span>
+  </div>
+
+  <div class="app">
+    <aside class="sidebar">
+      <div class="side-title">会话</div>
+      <div class="side-item active"><span class="ico"></span>主题定制</div>
+      <div class="side-item"><span class="ico"></span>项目脚手架</div>
+      <div class="side-item"><span class="ico"></span>代码审查</div>
+      <div class="side-item"><span class="ico"></span>调试日志分析</div>
+      <div class="side-item"><span class="ico"></span>文档撰写</div>
+    </aside>
+    <div class="main">
+      <div class="topbar">
+        <span class="title">主题定制</span>
+        <span class="badge">qwen38-27b</span>
+        <div class="spacer"></div>
+        <span class="avatar"></span>
+      </div>
+      <div class="chat">
+        <div class="msg user">
+          <div class="mavatar"></div>
+          <div class="body">
+            <span class="who">你</span>
+            <div class="bubble">帮我给 dsh 做一套多主题插件，能切换 Tokyo Night、Catppuccin、Claude 这些配色。</div>
+          </div>
+        </div>
+        <div class="msg">
+          <div class="mavatar"></div>
+          <div class="body">
+            <span class="who">DeepSeek Harness</span>
+            <div class="bubble">好的。dsh 的界面颜色全部走 <code>--dsw-alias-*</code> 这层 CSS 变量，我写一个客户端插件，把这套变量重新映射到各套配色（亮 / 暗各一份），并在「设置 → 插件」里放一张切换卡片。</div>
+            <div class="codeblock"><div class="banner">client.browser.js</div>function applyTheme(themeId) {\n  const css = buildCss(themeId);\n  tag.textContent = css;   // 覆盖 --dsw-alias-* 令牌\n}</div>
+          </div>
+        </div>
+        <div class="msg user">
+          <div class="mavatar"></div>
+          <div class="body">
+            <span class="who">你</span>
+            <div class="bubble">升级 dsh 之后主题会丢吗？</div>
+          </div>
+        </div>
+        <div class="msg">
+          <div class="mavatar"></div>
+          <div class="body">
+            <span class="who">DeepSeek Harness</span>
+            <div class="bubble">不会。插件代码放在 <code>~/.dsh/profiles/web/node_modules/</code>，注册写在 profile 的 bundles 里，都在你的用户目录，dsh 升级不会覆盖。选择的主题保存在 <code>settings.yaml</code>。</div>
+          </div>
+        </div>
+      </div>
+      <div class="composer">
+        <div class="box">
+          <span class="ph">回复 DeepSeek Harness…</span>
+          <div class="row">
+            <span class="chip">＋ 附件</span>
+            <span class="chip">⚡ 标准</span>
+            <div class="spacer"></div>
+            <button class="send">发送</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ===== theme logic (extracted verbatim from lib/client.browser.js) =====
+//#region color helpers
+		/** Expand #rgb / #rrggbb to {r,g,b}. */
+		function rgbOf(hex) {
+			let s = String(hex).replace("#", "");
+			if (s.length === 3) s = s.split("").map((c) => c + c).join("");
+			return {
+				r: parseInt(s.slice(0, 2), 16),
+				g: parseInt(s.slice(2, 4), 16),
+				b: parseInt(s.slice(4, 6), 16),
+			};
+		}
+		/** hex + alpha -> rgba() string. */
+		function withAlpha(hex, alpha) {
+			const { r, g, b } = rgbOf(hex);
+			return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+		}
+		/** Lighten (percent>0) or darken (percent<0) a hex color. */
+		function shade(hex, percent) {
+			const { r, g, b } = rgbOf(hex);
+			const target = percent < 0 ? 0 : 255;
+			const p = Math.min(100, Math.abs(percent)) / 100;
+			const mix = (v) => Math.round((target - v) * p + v);
+			const to2 = (v) => v.toString(16).padStart(2, "0");
+			return `#${to2(mix(r))}${to2(mix(g))}${to2(mix(b))}`;
+		}
+		//#endregion
+
+		//#region palettes
+		/*
+		 * Each palette defines the core colors; `normalize` fills the derived
+		 * ones (hover tints, borders, scrollbar, toast/tooltip) so a palette
+		 * only needs to state what actually differs between themes.
+		 */
+		const THEMES = {
+			"tokyo-night": {
+				label: "Tokyo Night",
+				dark: {
+					bg: "#1a1b26", surface1: "#16161e", surface2: "#1f2335", surface3: "#24283b",
+					text: "#c0caf5", textDim: "#a9b1d6", textFaint: "#565f89",
+					border: "#292e42", accent: "#7aa2f7",
+					codeBg: "#16161e", bubble: "#1f2335", sidebar: "#16161e",
+				},
+				light: {
+					bg: "#e8ebf0", surface1: "#f2f4f8", surface2: "#d8dee9", surface3: "#cfd8e3",
+					text: "#383a42", textDim: "#545c7e", textFaint: "#9aa5ce",
+					border: "#c0caf5", accent: "#3d59a1",
+					codeBg: "#f2f4f8", bubble: "#d8dee9", sidebar: "#eef1f6",
+				},
+			},
+			catppuccin: {
+				label: "Catppuccin",
+				dark: {
+					bg: "#1e1e2e", surface1: "#181825", surface2: "#313244", surface3: "#45475a",
+					text: "#cdd6f4", textDim: "#bac2de", textFaint: "#a6adc8",
+					border: "#45475a", accent: "#89b4fa",
+					codeBg: "#11111b", bubble: "#313244", sidebar: "#181825",
+				},
+				light: {
+					bg: "#eff1f5", surface1: "#e6e9ef", surface2: "#ccd0da", surface3: "#bcc0cc",
+					text: "#4c4f69", textDim: "#5c5f77", textFaint: "#7c7f93",
+					border: "#ccd0da", accent: "#1e66f5",
+					codeBg: "#e6e9ef", bubble: "#ccd0da", sidebar: "#e6e9ef",
+				},
+			},
+			claude: {
+				label: "Claude",
+				dark: {
+					bg: "#181715", surface1: "#1f1e1b", surface2: "#252320", surface3: "#2e2b27",
+					text: "#faf9f5", textDim: "#a09d96", textFaint: "#6c6a64",
+					border: "#2e2b27", accent: "#d97757",
+					codeBg: "#1f1e1b", bubble: "#252320", sidebar: "#1f1e1b",
+				},
+				light: {
+					bg: "#faf9f5", surface1: "#f5f0e8", surface2: "#efe9de", surface3: "#e8e0d2",
+					text: "#141413", textDim: "#3d3d3a", textFaint: "#6c6a64",
+					border: "#e6dfd8", accent: "#cc785c",
+					codeBg: "#f5f0e8", bubble: "#efe9de", sidebar: "#f5f0e8",
+				},
+			},
+			github: {
+				label: "GitHub",
+				dark: {
+					bg: "#0d1117", surface1: "#010409", surface2: "#21262d", surface3: "#30363d",
+					text: "#e6edf3", textDim: "#7d8590", textFaint: "#6e7681",
+					border: "#30363d", accent: "#58a6ff",
+					codeBg: "#010409", bubble: "#21262d", sidebar: "#010409",
+				},
+				light: {
+					bg: "#ffffff", surface1: "#f6f8fa", surface2: "#eaeef2", surface3: "#dde3e8",
+					text: "#1f2328", textDim: "#656d76", textFaint: "#6e7781",
+					border: "#d0d7de", accent: "#0969da",
+					codeBg: "#f6f8fa", bubble: "#f6f8fa", sidebar: "#f6f8fa",
+				},
+			},
+			dracula: {
+				label: "Dracula",
+				dark: {
+					bg: "#282a36", surface1: "#21222c", surface2: "#44475a", surface3: "#6272a4",
+					text: "#f8f8f2", textDim: "#c7c9e3", textFaint: "#6272a4",
+					border: "#44475a", accent: "#bd93f9",
+					codeBg: "#21222c", bubble: "#44475a", sidebar: "#21222c",
+				},
+				light: {
+					bg: "#f6f7f9", surface1: "#e9eaf0", surface2: "#dcdfe8", surface3: "#cfd3e0",
+					text: "#282a36", textDim: "#62647e", textFaint: "#9791ad",
+					border: "#cfd3e0", accent: "#6c5ce7",
+					codeBg: "#e9eaf0", bubble: "#dcdfe8", sidebar: "#e9eaf0",
+				},
+			},
+			nord: {
+				label: "Nord",
+				dark: {
+					bg: "#2e3440", surface1: "#292e39", surface2: "#3b4252", surface3: "#434c5e",
+					text: "#eceff4", textDim: "#d8dee9", textFaint: "#7b8494",
+					border: "#4c566a", accent: "#88c0d0",
+					codeBg: "#2e3440", bubble: "#3b4252", sidebar: "#2e3440",
+				},
+				light: {
+					bg: "#eceff4", surface1: "#e5e9f0", surface2: "#d8dee9", surface3: "#c8d0dc",
+					text: "#2e3440", textDim: "#4c566a", textFaint: "#7b8494",
+					border: "#c8d0dc", accent: "#5e81ac",
+					codeBg: "#e5e9f0", bubble: "#d8dee9", sidebar: "#e5e9f0",
+				},
+			},
+		};
+		const THEME_IDS = Object.keys(THEMES);
+		//#endregion
+
+		//#region css generation
+		/** Fill derived tokens so a palette only states its core colors. */
+		function normalize(p, isDark) {
+			return {
+				...p,
+				modulePlatform: p.modulePlatform ?? p.surface2,
+				overlay: p.overlay ?? p.surface3,
+				borderSubtle: p.borderSubtle ?? withAlpha(p.text, 0.08),
+				borderStrong: p.borderStrong ?? withAlpha(p.text, 0.2),
+				accentText: p.accentText ?? (isDark ? "#ffffff" : "#0f1115"),
+				inlineCode: p.inlineCode ?? p.surface2,
+				bubbleHighlight: p.bubbleHighlight ?? p.surface3,
+				input: p.input ?? p.surface1,
+				sidebarActive: p.sidebarActive ?? p.surface2,
+				sidebarHover: p.sidebarHover ?? p.surface2,
+				scrollbar: p.scrollbar ?? withAlpha(p.text, 0.22),
+				scrollbarHover: p.scrollbarHover ?? withAlpha(p.text, 0.38),
+				toast: p.toast ?? (isDark ? p.surface3 : shade(p.bg, -68)),
+				tooltip: p.tooltip ?? (isDark ? p.surface3 : shade(p.bg, -74)),
+			};
+		}
+		/** One mode's full --dsw-alias-* binding. */
+		function cssVars(p, isDark) {
+			const accentHover = isDark ? shade(p.accent, 14) : shade(p.accent, -14);
+			const vars = {
+				"--dsw-alias-bg-base": p.bg,
+				"--dsw-alias-bg-layer-1": p.surface1,
+				"--dsw-alias-bg-layer-2": p.surface2,
+				"--dsw-alias-bg-layer-3": p.surface3,
+				"--dsw-alias-bg-module-platform": p.modulePlatform,
+				"--dsw-alias-bg-overlay": p.overlay,
+				"--dsw-alias-bg-multi-select": p.surface2,
+				"--dsw-alias-bg-skeleton": withAlpha(p.text, 0.06),
+				"--dsw-alias-label-primary": p.text,
+				"--dsw-alias-label-secondary": p.textDim,
+				"--dsw-alias-label-tertiary": p.textFaint,
+				"--dsw-alias-label-caption": p.textFaint,
+				"--dsw-alias-label-dimmed": p.textFaint,
+				"--dsw-alias-label-primary-bluish": p.accent,
+				"--dsw-alias-label-primary-foreground": p.accentText,
+				"--dsw-alias-label-primary-inverted": p.accentText,
+				"--dsw-alias-border-l1": p.borderSubtle,
+				"--dsw-alias-border-l2": p.border,
+				"--dsw-alias-border-l3": p.borderStrong,
+				"--dsw-alias-border-l4": p.borderStrong,
+				"--dsw-alias-border-inverted": withAlpha(p.text, 0.1),
+				"--dsw-alias-border-inverted2": withAlpha(p.text, 0.16),
+				"--dsw-alias-brand-primary": p.accent,
+				"--dsw-alias-brand-primary-invert": p.accentText,
+				"--dsw-alias-brand-text": p.accent,
+				"--dsw-alias-interactive-bg-hover": withAlpha(p.accent, 0.08),
+				"--dsw-alias-interactive-bg-active": withAlpha(p.accent, 0.16),
+				"--dsw-alias-interactive-bg-hover-solid": p.surface2,
+				"--dsw-alias-interactive-bg-hover-accent": withAlpha(p.accent, 0.14),
+				"--dsw-alias-interactive-bg-hover-danger": "rgba(239, 68, 68, 0.08)",
+				"--dsw-alias-button-primary-fill": p.accent,
+				"--dsw-alias-button-primary-hover": accentHover,
+				"--dsw-alias-button-primary-dimmed": withAlpha(p.accent, 0.2),
+				"--dsw-alias-button-contrast-fill": p.accentText,
+				"--dsw-alias-button-elevated-fill": p.surface3,
+				"--dsw-alias-button-floating-fill": p.surface2,
+				"--dsw-alias-button-floating-hover": p.surface3,
+				"--dsw-alias-button-ghost-active-border": withAlpha(p.accent, 0.4),
+				"--dsw-alias-button-ghost-active-fill": withAlpha(p.accent, 0.12),
+				"--dsw-alias-button-ghost-active-hover": withAlpha(p.accent, 0.18),
+				"--dsw-alias-button-info-fill": p.accent,
+				"--dsw-alias-button-info-hover": accentHover,
+				"--dsw-alias-markdown-code-block": p.codeBg,
+				"--dsw-alias-markdown-code-block-banner": p.codeBg,
+				"--dsw-alias-markdown-inline-code": p.inlineCode,
+				"--dsw-alias-markdown-citation": p.surface2,
+				"--dsw-alias-markdown-placeholder": p.surface2,
+				"--dsw-alias-markdown-tag": p.surface2,
+				"--dsw-alias-markdown-code-segment-selected": p.surface1,
+				"--dsw-alias-markdown-code-segment-unselected": p.surface2,
+				"--dsw-specific-bubble": p.bubble,
+				"--dsw-specific-bubble-highlight": p.bubbleHighlight,
+				"--dsw-specific-input-major": p.input,
+				"--dsw-specific-login-input": p.input,
+				"--dsw-specific-menu": p.surface3,
+				"--dsw-specific-selector": p.surface2,
+				"--dsw-specific-tip": p.surface2,
+				"--dsw-specific-sidebar-fill": p.sidebar,
+				"--dsw-specific-sidebar-nav-item-active": p.sidebarActive,
+				"--dsw-specific-sidebar-nav-item-active-accent": withAlpha(p.accent, 0.14),
+				"--dsw-specific-sidebar-nav-item-hover": p.sidebarHover,
+				"--dsw-alias-scrollbar-bg-l1": p.scrollbar,
+				"--dsw-alias-scrollbar-bg-l2": p.scrollbar,
+				"--dsw-alias-scrollbar-hover-l1": p.scrollbarHover,
+				"--dsw-alias-scrollbar-hover-l2": p.scrollbarHover,
+				"--dsw-alias-toast-bg": p.toast,
+				"--dsw-alias-tooltip-bg": p.tooltip,
+				"--dsw-alias-state-business-primary": p.accent,
+				"--dsw-alias-state-business-tertiary": withAlpha(p.accent, 0.14),
+			};
+			return Object.entries(vars).map(([k, v]) => `${k}:${v}!important`).join(";");
+		}
+		/** Full stylesheet for one palette (light + dark). */
+		function buildCss(themeId) {
+			const theme = THEMES[themeId];
+			if (!theme) return "";
+			return [
+				`/* dsh-theme-pack: ${theme.label} */`,
+				`body{${cssVars(normalize(theme.light, false), false)}}`,
+				`body[data-ds-dark-theme]{${cssVars(normalize(theme.dark, true), true)}}`,
+			].join("\n");
+		}
+		//#endregion
+// ===== preview wiring =====
+const STYLE_ID = "preview-theme-style";
+let currentTheme = "tokyo-night";
+let currentDark = true;
+
+function applyPreview() {
+  let tag = document.getElementById(STYLE_ID);
+  if (!tag) { tag = document.createElement("style"); tag.id = STYLE_ID; document.head.appendChild(tag); }
+  tag.textContent = buildCss(currentTheme);
+  document.body.toggleAttribute("data-ds-dark-theme", currentDark);
+  // reflect selection in the control bar
+  document.querySelectorAll(".tbtn").forEach((b) => b.classList.toggle("on", b.dataset.id === currentTheme));
+  document.getElementById("modeLight").classList.toggle("on", !currentDark);
+  document.getElementById("modeDark").classList.toggle("on", currentDark);
+}
+
+const themesEl = document.getElementById("themes");
+for (const id of Object.keys(THEMES)) {
+  const b = document.createElement("button");
+  b.className = "tbtn"; b.dataset.id = id; b.title = THEMES[id].label;
+  b.innerHTML = `<span class="dot" style="background:${THEMES[id].dark.accent}"></span>${THEMES[id].label}`;
+  b.onclick = () => { currentTheme = id; applyPreview(); };
+  themesEl.appendChild(b);
+}
+document.getElementById("modeLight").onclick = () => { currentDark = false; applyPreview(); };
+document.getElementById("modeDark").onclick = () => { currentDark = true; applyPreview(); };
+
+applyPreview();
+</script>
+</body>
+</html>
